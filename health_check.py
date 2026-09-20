@@ -4,16 +4,22 @@ from netmiko import ConnectHandler
 import yaml
 from getpass import getpass
 
+
 def parse_interfaces(output):
     interfaces = []
+    in_interface_table = False
 
     for line in output.splitlines():
         line = line.strip()
 
-        if not line:
+        if line.startswith("Interface") and "Status" in line and "VRF" in line:
+            in_interface_table = True
             continue
 
-        if line.startswith("Interface"):
+        if not in_interface_table:
+            continue
+
+        if not line:
             continue
 
         if line.startswith("---------"):
@@ -35,6 +41,7 @@ def parse_interfaces(output):
 
     return interfaces
 
+
 def summarize_interfaces(interfaces):
     up_count = 0
     down_count = 0
@@ -47,6 +54,7 @@ def summarize_interfaces(interfaces):
 
     return up_count, down_count
 
+
 def print_health_summary(router_name, interfaces, up_count, down_count):
     print(f"\nChecking {router_name}")
     print(f"{len(interfaces)} interfaces checked")
@@ -56,6 +64,7 @@ def print_health_summary(router_name, interfaces, up_count, down_count):
     for interface in interfaces:
         if interface["status"] != "up":
             print(f"WARNING: {interface['name']} is {interface['status']}")
+
 
 def check_router(router, password):
     device = {
@@ -102,16 +111,21 @@ def check_router(router, password):
         "down_count": down_count
     }
 
-with open("/home/christopher/network-health-checker/devices.yaml", "r") as file:
-    inventory = yaml.safe_load(file)
 
-password = getpass("Password: ")
-report = []
+def main():
+    with open("/home/christopher/network-health-checker/devices.yaml", "r") as file:
+        inventory = yaml.safe_load(file)
 
-for router in inventory["routers"]:
-    result = check_router(router, password)
-    report.append(result)
+    password = getpass("Password: ")
+    report = []
 
-with open("health_report.json", "w") as file:
-    json.dump(report, file, indent=4)
-    
+    for router in inventory["routers"]:
+        result = check_router(router, password)
+        report.append(result)
+
+    with open("health_report.json", "w") as file:
+        json.dump(report, file, indent=4)
+
+
+if __name__ == "__main__":
+    main()
