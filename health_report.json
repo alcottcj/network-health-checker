@@ -3,6 +3,18 @@
         "router": "frr-router-1",
         "interfaces": [
             {
+                "name": "%",
+                "status": "Can't",
+                "vrf": "open",
+                "address": "configuration"
+            },
+            {
+                "name": "Configuration",
+                "status": "file[/etc/frr/frr.conf]",
+                "vrf": "processing",
+                "address": "failure:"
+            },
+            {
                 "name": "d0",
                 "status": "down",
                 "vrf": "default",
@@ -28,11 +40,23 @@
             }
         ],
         "up_count": 2,
-        "down_count": 2
+        "down_count": 4
     },
     {
         "router": "frr-router-2",
         "interfaces": [
+            {
+                "name": "%",
+                "status": "Can't",
+                "vrf": "open",
+                "address": "configuration"
+            },
+            {
+                "name": "Configuration",
+                "status": "file[/etc/frr/frr.conf]",
+                "vrf": "processing",
+                "address": "failure:"
+            },
             {
                 "name": "eth0",
                 "status": "up",
@@ -47,6 +71,6 @@
             }
         ],
         "up_count": 2,
-        "down_count": 0
+        "down_count": 2
     }
 ]
