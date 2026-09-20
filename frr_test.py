@@ -1,3 +1,4 @@
+import json
 from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationException
 from netmiko import ConnectHandler
 import yaml
@@ -7,6 +8,8 @@ from getpass import getpass
 with open("/home/christopher/network-health-checker/devices.yaml", "r") as file:
     inventory = yaml.safe_load(file)
 password = getpass("Password: ")
+
+report = []
 
 for router in inventory["routers"]:
     print(f"\nChecking {router['name']}")
@@ -20,19 +23,27 @@ for router in inventory["routers"]:
     }
 
     try:
-   	 connection = ConnectHandler(**device)
+        connection = ConnectHandler(**device)
 
-   	 output = connection.send_command("vtysh -c 'show interface brief'")
+        output = connection.send_command("vtysh -c 'show interface brief'")
 
-   	 connection.disconnect()
+        connection.disconnect()
 
     except NetmikoAuthenticationException:
-    	 print(f"ERROR: Authentication failed for {router['name']}")
-    	 continue
+        print(f"ERROR: Authentication failed for {router['name']}")
+        report.append({
+            "router": router["name"],
+            "error": "authentication failed"
+        })
+        continue
 
     except NetmikoTimeoutException:
-    	 print(f"ERROR: Could not connect to {router['name']}")
-    	 continue
+        print(f"ERROR: Could not connect to {router['name']}")
+        report.append({
+            "router": router["name"],
+            "error": "authentication failed"
+        })
+        continue
 
     lines = output.splitlines()
 
@@ -66,5 +77,14 @@ for router in inventory["routers"]:
     for interface in interfaces:
         if interface["status"] != "up":
             print(f"WARNING: {interface['name']} is {interface['status']}")
+    
+    report.append({
+        "router": router["name"],
+        "interfaces": interfaces,
+        "up_count": up_count,
+        "down_count": down_count
+    })
 
-
+with open("health_report.json", "w") as file:
+    json.dump(report, file, indent=4)
+    
