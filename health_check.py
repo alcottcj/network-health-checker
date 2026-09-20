@@ -5,11 +5,24 @@ import yaml
 from getpass import getpass
 
 def parse_interfaces(output):
-    lines = output.splitlines()
     interfaces = []
 
-    for line in lines[4:]:
+    for line in output.splitlines():
+        line = line.strip()
+
+        if not line:
+            continue
+
+        if line.startswith("Interface"):
+            continue
+
+        if line.startswith("---------"):
+            continue
+
         fields = line.split()
+
+        if len(fields) < 3:
+            continue
 
         interface = {
             "name": fields[0],
