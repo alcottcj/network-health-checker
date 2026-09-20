@@ -1,3 +1,4 @@
+from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationException
 from netmiko import ConnectHandler
 import yaml
 from getpass import getpass
@@ -18,10 +19,20 @@ for router in inventory["routers"]:
         "password": password,
     }
 
-    connection = ConnectHandler(**device)
+    try:
+   	 connection = ConnectHandler(**device)
 
-    output = connection.send_command("vtysh -c 'show interface brief'")
-    connection.disconnect()
+   	 output = connection.send_command("vtysh -c 'show interface brief'")
+
+   	 connection.disconnect()
+
+    except NetmikoAuthenticationException:
+    	 print(f"ERROR: Authentication failed for {router['name']}")
+    	 continue
+
+    except NetmikoTimeoutException:
+    	 print(f"ERROR: Could not connect to {router['name']}")
+    	 continue
 
     lines = output.splitlines()
 
