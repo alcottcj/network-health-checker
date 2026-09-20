@@ -1,5 +1,5 @@
-from health_check import parse_interfaces, summarize_interfaces
-
+from health_check import parse_interfaces, summarize_interfaces, check_router
+from unittest.mock import patch, MagicMock
 
 def test_parse_interfaces():
     sample_output = """Interface       Status  VRF             Addresses
@@ -31,3 +31,46 @@ def test_summarize_interfaces():
 
     assert up_count == 2
     assert down_count == 1
+
+def test_check_router_success():
+    fake_connection = MagicMock()
+
+    fake_connection.send_command.return_value = """Interface       Status  VRF             Addresses
+---------       ------  ---             ---------
+eth0            up      default         172.17.0.2/16
+lo              up      default
+"""
+
+    router = {
+        "name": "test-router",
+        "host": "127.0.0.1",
+        "port": 2222,
+        "username": "netadmin",
+    }
+
+    with patch("health_check.ConnectHandler", return_value=fake_connection):
+        result = check_router(router, "fake-password")
+
+    assert result["router"] == "test-router"
+    assert result["up_count"] == 2
+    assert result["down_count"] == 0
+
+from netmiko.exceptions import NetmikoTimeoutException
+
+
+def test_check_router_timeout():
+    router = {
+        "name": "test-router",
+        "host": "127.0.0.1",
+        "port": 2222,
+        "username": "netadmin",
+    }
+
+    with patch(
+        "health_check.ConnectHandler",
+        side_effect=NetmikoTimeoutException
+    ):
+        result = check_router(router, "fake-password")
+
+    assert result["router"] == "test-router"
+    assert result["error"] == "connection failed"
