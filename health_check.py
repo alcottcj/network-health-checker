@@ -1,3 +1,4 @@
+from pathlib import Path
 import json
 from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationException
 from netmiko import ConnectHandler
@@ -113,7 +114,10 @@ def check_router(router, password):
 
 
 def main():
-    with open("/home/christopher/network-health-checker/devices.yaml", "r") as file:
+    project_dir = Path(__file__).parent
+    inventory_file = project_dir / "devices.yaml"
+
+    with open(inventory_file, "r") as file:
         inventory = yaml.safe_load(file)
 
     password = getpass("Password: ")
