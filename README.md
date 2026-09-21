@@ -39,7 +39,8 @@ The current lab uses FRRouting containers running on a Linux Mint host. SSH acce
 
 1. Activate the Python virtual environment:
 
-    source ~/frr-automation/bin/activate
+    python3 -m venv .venv
+    source .venv/bin/activate
 
 2. Install dependencies:
 
