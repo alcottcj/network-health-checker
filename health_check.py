@@ -115,6 +115,7 @@ def check_router(router, password):
 
 def main():
     project_dir = Path(__file__).parent
+    report_file = project_dir / "health_report.json"
     inventory_file = project_dir / "devices.yaml"
 
     with open(inventory_file, "r") as file:
@@ -127,7 +128,7 @@ def main():
         result = check_router(router, password)
         report.append(result)
 
-    with open("health_report.json", "w") as file:
+    with open(report_file, "w") as file:
         json.dump(report, file, indent=4)
 
 
