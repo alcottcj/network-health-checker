@@ -1,5 +1,7 @@
 # Network Health Checker
 
+![Tests](https://github.com/alcottcj/network-health-checker/actions/workflows/tests.yml/badge.svg)
+
 A Python-based network automation project that connects to FRRouting devices over SSH, collects interface status information, and identifies interfaces that are down.
 
 ## Current Features
